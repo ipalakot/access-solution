@@ -1,0 +1,88 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Acccess Store - Connexion
+{% endblock %}
+{% block body %}
+	<!-- container -->
+	<div class="container">
+		<div
+			class="row">
+			<!-- Article main content -->
+			<article class="col-xs-12 maincontent">
+				<header class="page-header">
+					<h1 class="page-title">Se connecter</h1>
+				</header>
+
+				<div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<h3 class="thin text-center">se connecter</h3>
+							{% for message in app.flashes('success') %}
+								<div class="">
+									{{ message }}
+								</div>
+							{% endfor %}
+							{% if error %}
+								<div class="text-danger">
+									{{ error.messageKey|trans(error.messageData, 'security') }}
+								</div>
+							{% endif %}
+
+
+							<hr/>
+
+							<form action="{{ path('security_login') }}" method="post" name="login">
+								<div class="top-margin">
+									<label for="username">
+										<span class="text-danger">*</span>
+									</label>
+									<input type="email" class="form-control" id="username" name="_username" placeholder="exemple@aStore.fr" value="{{ last_username }}"/>
+								</div>
+								<div class="top-margin">
+									<label>mot de passe
+										<span class="text-danger">*</span>
+									</label>
+									<input type="password" class="form-control" id="password" name="_password" placeholder="********"/>
+								</div>
+
+								<hr/>
+
+								<div class="row">
+									<div class="col-lg-8">
+										<b>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<a href="{% if user is defined and user is not null %} {{ path('user.edit.password', {id : app.user.id}) }} {% endif %}">mot de passe oublié</a>
+</b>
+									</div>
+									<div class="col-lg-4 text-right">
+										<button class='btn btn-action' type='submit'>se connecter</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</article>
+			<!-- /Article -->
+		</div>
+	</div>
+	<!-- /container -->
+{% endblock %}
