@@ -8,6 +8,7 @@ use App\Entity\Image;
 use App\Entity\Category;
 use App\Form\ProductType;
 use App\Form\CategoryType;
+
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -89,7 +90,7 @@ class ProductController extends AbstractController {
         );
     }
 
-    #[ Route( '/product/{id}', name: 'product_show', methods: [ 'GET' ] ) ]
+    #[ Route( '/{id}', name: 'product_show', methods: [ 'GET' ] ) ]
 
     public function show( Product $product ): Response {
         // Vérifier si le produit existe
