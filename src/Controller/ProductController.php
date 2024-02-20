@@ -2,18 +2,21 @@
 
 namespace App\Controller;
 
+use App\Data\SearchData;
 use App\Entity\Product;
 use App\Entity\Image;
+use App\Entity\Category;
 use App\Form\ProductType;
+use App\Form\CategoryType;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 #[ Route( '/product' ) ]
 
 class ProductController extends AbstractController {
@@ -45,10 +48,9 @@ class ProductController extends AbstractController {
         $form->handleRequest( $request );
 
         if ( $form->isSubmitted() && $form->isValid() ) {
-            // Gestion des ImageOfProduct pour un product
-            // Je récupère les ImageOfProduct transmises depuis le formulaire à travers 1 products et je vais chercher les données( getData )
+
+            // recuperer les images
             $imageShop = $form->get( 'imageShop' )->getData();
-            // Assurez-vous que le nom du champ correspond à celui de votre formulaire
 
             // On boucle sur les ImageOfProduct ( lorsque j'ai plusieurs ImageOfProduct)
             foreach ($imageShop as $image) {
@@ -87,9 +89,14 @@ class ProductController extends AbstractController {
         );
     }
 
-    #[ Route( '/{id}', name: 'product_show', methods: [ 'GET' ] ) ]
+    #[ Route( '/product/{id}', name: 'product_show', methods: [ 'GET' ] ) ]
 
     public function show( Product $product ): Response {
+        // Vérifier si le produit existe
+        if ( !$product ) {
+            throw new NotFoundHttpException( 'Produit non trouvé' );
+        }
+
         return $this->render( 'pages/product/show.html.twig', [
             'product' => $product,
         ] );
@@ -98,18 +105,33 @@ class ProductController extends AbstractController {
     #[ Route( '/{id}/edit', name: 'product_edit', methods: [ 'GET', 'POST' ] ) ]
 
     public function edit( Request $request, Product $product, EntityManagerInterface $entityManager ): Response {
-        $form = $this->createForm( ProductType::class, $product );
+        $form = $this->createFormBuilder( $product )
+        ->add( 'title' )
+        ->add( 'category', EntityType::class, [
+            'label' => 'Categorie',
+            'placeholder' => 'Categorie',
+            'class' => Category::class,
+            'choice_label' => 'title',
+        ] )
+        ->getForm();
+
         $form->handleRequest( $request );
 
         if ( $form->isSubmitted() && $form->isValid() ) {
+            $entityManager->persist( $product );
             $entityManager->flush();
 
-            return $this->redirectToRoute( 'product_index', [], Response::HTTP_SEE_OTHER );
+            $this->addFlash(
+                'success',
+                'Votre article a été modifié avec succès !'
+            );
+
+            return $this->redirectToRoute( 'product_index' );
         }
 
-        return $this->renderForm( 'pages/product/edit.html.twig', [
+        return $this->render( 'pages/product/edit.html.twig', [
             'product' => $product,
-            'form' => $form,
+            'form' => $form->createView(),
         ] );
     }
 
@@ -123,4 +145,31 @@ class ProductController extends AbstractController {
 
         return $this->redirectToRoute( 'product_index', [], Response::HTTP_SEE_OTHER );
     }
+    #[ Route( '/product-categoryinformatique]', name: 'category_informatique' ) ]
+
+    public function indexCategoryInformatique( ProductRepository $productRepository, Request $request ) {
+        $products = $productRepository->findBycategoryInformatique();
+        return $this->render( 'pages/product/index.html.twig', [ 'products' => $products ] );
+    }
+
+    // Affichage des products par category & prix
+    #[ Route( '/product/products-categorys-price', name: 'product_categorys_price', methods: [ 'GET', 'POST' ] ) ]
+
+    public function productsParCategoryPrix( Request $request, ProductRepository $repository ) {
+        $data = new SearchData();
+
+        $form = $this->createForm( SearchForm::class, $data );
+
+        $products = $repository->findSearch( $data );
+
+        // Appel de la page pour affichage
+        return $this->render(
+            'product/index.html.twig', [
+                // passage du contenu de $location
+                'products' => $products,
+                'form' => $form->createView(),
+            ]
+        );
+    }
+
 }
