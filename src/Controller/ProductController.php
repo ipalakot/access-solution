@@ -6,10 +6,14 @@ use App\Data\SearchData;
 use App\Entity\Product;
 use App\Entity\Image;
 use App\Entity\Category;
+
 use App\Form\ProductType;
 use App\Form\CategoryType;
+use App\Form\SearchForm;
 
 use App\Repository\ProductRepository;
+use App\Repository\CategoryRepository;
+
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -109,8 +113,8 @@ class ProductController extends AbstractController {
         $form = $this->createFormBuilder( $product )
         ->add( 'title' )
         ->add( 'category', EntityType::class, [
-            'label' => 'Categorie',
-            'placeholder' => 'Categorie',
+            'label' => 'Category',
+            'placeholder' => 'Category',
             'class' => Category::class,
             'choice_label' => 'title',
         ] )
@@ -154,23 +158,33 @@ class ProductController extends AbstractController {
     }
 
     // Affichage des products par category & prix
-    #[ Route( '/product/products-categorys-price', name: 'product_categorys_price', methods: [ 'GET', 'POST' ] ) ]
 
-    public function productsParCategoryPrix( Request $request, ProductRepository $repository ) {
-        $data = new SearchData();
+    // Affichage des produits par catégorie & prix
+    #[ Route( '/product/products-categorys-price', name: 'product_categorys_price', methods: [ 'GET', 'PRODUCT' ] ) ]
 
-        $form = $this->createForm( SearchForm::class, $data );
+    public function productsParCategoryPrix(Request $request, ProductRepository $productRepository, CategoryRepository $categoryRepository): Response {
+        $searchData = new SearchData();
 
-        $products = $repository->findSearch( $data );
+        $form = $this->createForm( SearchForm::class, $searchData);
 
-        // Appel de la page pour affichage
-        return $this->render(
-            'product/index.html.twig', [
-                // passage du contenu de $location
-                'products' => $products,
+        $form->handleRequest( $request );
+
+        if ( $form->isSubmitted() && $form->isValid() ) {
+            $searchData->page = $request->query->getInt( 'page', 1 );
+            $products = $productRepository->findBySearch( $searchData );
+
+            return $this->render( 'pages/product/index.html.twig', [
+                'category' => $category,
                 'form' => $form->createView(),
-            ]
-        );
+                'products' => $products
+            ] );
+        }
+
+        return $this->render( 'pages/category/index.html.twig', [
+            'category' => $category,
+            'form' => $form->createView(),
+            'products' => $productRepository->findSearch( $request->query->getInt( 'page', 1 ), $category )
+        ] );
     }
 
 }

@@ -1,34 +1,33 @@
 <?php
 
 namespace App\Data;
-use App\Entity\Categorie;
+use App\Entity\Category;
 
-class SearchData
-{
+class SearchData {
 
     /**
-     * @var int
-     */
+    * @var int
+    */
     public $page = 1;
 
     /**
-     * @var string
-     */
+    * @var string
+    */
     public $q = '';
 
     /**
-     * @var Categorie[]
-     */
-    public $categorie = [];
+    * @var categoryShop[]
+    */
+    public $categoryShop = [];
 
     /**
-     * @var null|integer
-     */
+    * @var null|integer
+    */
     public $max;
 
     /**
-     * @var null|integer
-     */
+    * @var null|integer
+    */
     public $min;
 
 }
