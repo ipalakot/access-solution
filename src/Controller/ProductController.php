@@ -180,7 +180,7 @@ class ProductController extends AbstractController {
             ] );
         }
 
-        return $this->render( 'pages/category/index.html.twig', [
+        return $this->render( 'pages/product/index.html.twig', [
             'category' => $category,
             'form' => $form->createView(),
             'products' => $productRepository->findSearch( $request->query->getInt( 'page', 1 ), $category )

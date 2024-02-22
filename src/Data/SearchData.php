@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Data;
+
 use App\Entity\Category;
 
 class SearchData {
@@ -16,7 +17,7 @@ class SearchData {
     public $q = '';
 
     /**
-    * @var categoryShop[]
+    * @var Category[]
     */
     public $categoryShop = [];
 

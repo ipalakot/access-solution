@@ -48,6 +48,6 @@ class CartController extends AbstractController {
     public function removeAll( CartService $cartService ): Response {
         $cartService->revoveCartAll();
 
-        return $this->redirectToRoute( 'shop_index' );
+        return $this->redirectToRoute( 'product_index' );
     }
 }
